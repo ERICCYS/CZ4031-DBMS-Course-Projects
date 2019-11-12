@@ -1,0 +1,115 @@
+[
+  {
+    "Plan": {
+      "Node Type": "Sort",
+      "Parallel Aware": false,
+      "Startup Cost": 5780.79,
+      "Total Cost": 5780.89,
+      "Plan Rows": 40,
+      "Plan Width": 226,
+      "Sort Key": ["(count(*)) DESC"],
+      "Plans": [
+        {
+          "Node Type": "Aggregate",
+          "Strategy": "Sorted",
+          "Partial Mode": "Finalize",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Startup Cost": 5748.43,
+          "Total Cost": 5779.73,
+          "Plan Rows": 40,
+          "Plan Width": 226,
+          "Group Key": ["nation.name"],
+          "Filter": "(count(*) >= 6000)",
+          "Plans": [
+            {
+              "Node Type": "Gather Merge",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Startup Cost": 5748.43,
+              "Total Cost": 5776.43,
+              "Plan Rows": 240,
+              "Plan Width": 226,
+              "Workers Planned": 2,
+              "Plans": [
+                {
+                  "Node Type": "Sort",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Startup Cost": 4748.40,
+                  "Total Cost": 4748.70,
+                  "Plan Rows": 120,
+                  "Plan Width": 226,
+                  "Sort Key": ["nation.name"],
+                  "Plans": [
+                    {
+                      "Node Type": "Aggregate",
+                      "Strategy": "Hashed",
+                      "Partial Mode": "Partial",
+                      "Parent Relationship": "Outer",
+                      "Parallel Aware": false,
+                      "Startup Cost": 4743.06,
+                      "Total Cost": 4744.26,
+                      "Plan Rows": 120,
+                      "Plan Width": 226,
+                      "Group Key": ["nation.name"],
+                      "Plans": [
+                        {
+                          "Node Type": "Hash Join",
+                          "Parent Relationship": "Outer",
+                          "Parallel Aware": false,
+                          "Join Type": "Inner",
+                          "Startup Cost": 12.70,
+                          "Total Cost": 4430.56,
+                          "Plan Rows": 62500,
+                          "Plan Width": 218,
+                          "Inner Unique": true,
+                          "Hash Cond": "(customer.nationkey = nation.nationkey)",
+                          "Plans": [
+                            {
+                              "Node Type": "Seq Scan",
+                              "Parent Relationship": "Outer",
+                              "Parallel Aware": true,
+                              "Relation Name": "customer",
+                              "Alias": "customer",
+                              "Startup Cost": 0.00,
+                              "Total Cost": 4248.00,
+                              "Plan Rows": 62500,
+                              "Plan Width": 4
+                            },
+                            {
+                              "Node Type": "Hash",
+                              "Parent Relationship": "Inner",
+                              "Parallel Aware": false,
+                              "Startup Cost": 11.20,
+                              "Total Cost": 11.20,
+                              "Plan Rows": 120,
+                              "Plan Width": 222,
+                              "Plans": [
+                                {
+                                  "Node Type": "Seq Scan",
+                                  "Parent Relationship": "Outer",
+                                  "Parallel Aware": false,
+                                  "Relation Name": "nation",
+                                  "Alias": "nation",
+                                  "Startup Cost": 0.00,
+                                  "Total Cost": 11.20,
+                                  "Plan Rows": 120,
+                                  "Plan Width": 222
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

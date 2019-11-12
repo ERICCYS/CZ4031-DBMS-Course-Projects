@@ -1,0 +1,123 @@
+[
+  {
+    "Plan": {
+      "Node Type": "Sort",
+      "Parallel Aware": false,
+      "Startup Cost": 147630.70,
+      "Total Cost": 147630.76,
+      "Plan Rows": 25,
+      "Plan Width": 17,
+      "Sort Key": [
+        "(count(*)) DESC"
+      ],
+      "Plans": [
+        {
+          "Node Type": "Aggregate",
+          "Strategy": "Sorted",
+          "Partial Mode": "Finalize",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Startup Cost": 147623.79,
+          "Total Cost": 147630.12,
+          "Plan Rows": 25,
+          "Plan Width": 17,
+          "Group Key": [
+            "part.brand"
+          ],
+          "Plans": [
+            {
+              "Node Type": "Gather Merge",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Startup Cost": 147623.79,
+              "Total Cost": 147629.62,
+              "Plan Rows": 50,
+              "Plan Width": 17,
+              "Workers Planned": 2,
+              "Plans": [
+                {
+                  "Node Type": "Sort",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Startup Cost": 146623.76,
+                  "Total Cost": 146623.82,
+                  "Plan Rows": 25,
+                  "Plan Width": 17,
+                  "Sort Key": [
+                    "part.brand"
+                  ],
+                  "Plans": [
+                    {
+                      "Node Type": "Aggregate",
+                      "Strategy": "Hashed",
+                      "Partial Mode": "Partial",
+                      "Parent Relationship": "Outer",
+                      "Parallel Aware": false,
+                      "Startup Cost": 146622.93,
+                      "Total Cost": 146623.18,
+                      "Plan Rows": 25,
+                      "Plan Width": 17,
+                      "Group Key": [
+                        "part.brand"
+                      ],
+                      "Plans": [
+                        {
+                          "Node Type": "Hash Join",
+                          "Parent Relationship": "Outer",
+                          "Parallel Aware": true,
+                          "Join Type": "Inner",
+                          "Startup Cost": 5696.00,
+                          "Total Cost": 143284.34,
+                          "Plan Rows": 667718,
+                          "Plan Width": 9,
+                          "Inner Unique": true,
+                          "Hash Cond": "(lineitem.partkey = part.partkey)",
+                          "Plans": [
+                            {
+                              "Node Type": "Seq Scan",
+                              "Parent Relationship": "Outer",
+                              "Parallel Aware": true,
+                              "Relation Name": "lineitem",
+                              "Alias": "lineitem",
+                              "Startup Cost": 0.00,
+                              "Total Cost": 135835.55,
+                              "Plan Rows": 667718,
+                              "Plan Width": 4,
+                              "Filter": "(commitdate > '1997-01-01'::date)"
+                            },
+                            {
+                              "Node Type": "Hash",
+                              "Parent Relationship": "Inner",
+                              "Parallel Aware": true,
+                              "Startup Cost": 4654.33,
+                              "Total Cost": 4654.33,
+                              "Plan Rows": 83333,
+                              "Plan Width": 13,
+                              "Plans": [
+                                {
+                                  "Node Type": "Seq Scan",
+                                  "Parent Relationship": "Outer",
+                                  "Parallel Aware": true,
+                                  "Relation Name": "part",
+                                  "Alias": "part",
+                                  "Startup Cost": 0.00,
+                                  "Total Cost": 4654.33,
+                                  "Plan Rows": 83333,
+                                  "Plan Width": 13
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
