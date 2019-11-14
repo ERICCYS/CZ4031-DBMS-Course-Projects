@@ -44,14 +44,21 @@ class App(object):
 
         out = tk.Label(self.frm_oo, text='OUTPUT', font=(None, 18))
         out.pack(side=TOP)
-        self.ooo = tk.Label(self.frm_oo, relief=GROOVE, width=30, height=5, borderwidth=5, font=(None, 18))
-        self.ooo.pack()
+        
+        #self.ooo = tk.Label(self.frm_oo, relief=GROOVE, width=30, height=5, borderwidth=5, font=(None, 18))
+        #self.ooo.pack(side = TOP)
+
+        self.output = tk.Text(self.frm_oo, relief=GROOVE, width=30, height=5, borderwidth=5, font=(None, 18))
+        self.output.pack(side = BOTTOM)
 
         view = tk.Button(self.button, text="view output", width=10, height=4, command=self.retrieve_input)
-        view.pack(side=LEFT, padx=100)
+        view.pack(side=LEFT, padx=50,pady=5)
+
+        clear = tk.Button(self.button, text="clear input", width=10, height=4, command=self.clear_input)
+        clear.pack(side=LEFT, padx=50,pady=5)
 
         quit_ = tk.Button(self.button, text="cancel", width=10, height=4, command=self.quitprogram)
-        quit_.pack(side=RIGHT, padx=100)
+        quit_.pack(side=RIGHT, padx=50,pady=5)
 
     def retrieve_input(self):
         global query_old
@@ -62,9 +69,13 @@ class App(object):
         query_new = self.Q2.get("1.0", END)
         desc = self.Q3.get("1.0", END)
         result = self.get_output(query_old, query_new, desc)
-        self.ooo.pack_forget()
-        output = tk.Label(self.frm_oo, text=result, relief=GROOVE, width=30, height=5, borderwidth=5, font=(None, 18))
-        output.pack()
+        self.output.delete("1.0", END)   #Clear the text window so we can write.
+        self.output.insert(END,result)
+
+    def clear_input(self):
+        self.Q1.delete("1.0", END)
+        self.Q2.delete("1.0", END)
+        self.Q3.delete("1.0", END) 
 
     def get_output(self, query_old, query_new, desc):
         connection = DBConnection()
