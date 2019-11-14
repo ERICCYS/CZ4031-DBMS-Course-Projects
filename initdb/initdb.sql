@@ -12,7 +12,7 @@ COPY public.region (
     regionkey,
     name, 
     comment
-) FROM '/Users/eric/Desktop/Data/region-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/region-processed.csv' DELIMITER '|' CSV HEADER;
 
 CREATE TABLE public.part (
     partkey integer, 
@@ -37,7 +37,7 @@ COPY public.part (
     container, 
     retailprice, 
     comment
-) FROM '/Users/eric/Desktop/Data/part-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/part-processed.csv' DELIMITER '|' CSV HEADER;
 
 CREATE TABLE public.nation (
     nationkey integer, 
@@ -52,7 +52,7 @@ COPY public.nation (
     name, 
     regionkey, 
     comment
-) FROM '/Users/eric/Desktop/Data/nation-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/nation-processed.csv' DELIMITER '|' CSV HEADER;
 
 CREATE TABLE public.supplier (
     suppkey integer, 
@@ -73,7 +73,7 @@ COPY public.supplier (
     phone, 
     acctbal, 
     comment
-) FROM '/Users/eric/Desktop/Data/supplier-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/supplier-processed.csv' DELIMITER '|' CSV HEADER;
 
 CREATE TABLE public.partsupp (
     partkey integer references public.part(partkey), 
@@ -89,7 +89,7 @@ COPY public.partsupp (
     availqty, 
     supplycost, 
     comment
-) FROM '/Users/eric/Desktop/Data/partsupp-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/partsupp-processed.csv' DELIMITER '|' CSV HEADER;
 
 CREATE TABLE public.customer (
     custkey integer, 
@@ -112,7 +112,7 @@ COPY public.customer (
     acctbal, 
     mktsegment, 
     comment
-) FROM '/Users/eric/Desktop/Data/customer-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/customer-processed.csv' DELIMITER '|' CSV HEADER;
 
 CREATE TABLE public.orders (
     orderkey integer, 
@@ -137,7 +137,7 @@ COPY public.orders (
     clerk, 
     shippriority, 
     comment
-) FROM '/Users/eric/Desktop/Data/orders-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/orders-processed.csv' DELIMITER '|' CSV HEADER;
 
 CREATE TABLE public.lineitem (
     orderkey integer references public.orders(orderkey), 
@@ -175,4 +175,4 @@ COPY public.lineitem (
     shipinstruct, 
     shipmode, 
     comment
-) FROM '/Users/eric/Desktop/Data/lineitem-processed.csv' DELIMITER '|' CSV HEADER;
+) FROM './Data/lineitem-processed.csv' DELIMITER '|' CSV HEADER;
