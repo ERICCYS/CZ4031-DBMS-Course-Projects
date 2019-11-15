@@ -392,8 +392,66 @@ def generate_tree(tree, node, _prefix="", _last=True):
         tree = tree + generate_tree(tree, child, _prefix, _last)
     return tree
 
+def modify_text(str):
+    str = str.replace('perform ', '')
+    return str
+
+def check_children(nodeA, nodeB, difference):
+    global num
+    childrenA = nodeA.children
+    childrenB = nodeB.children
+    children_no_A = len(childrenA)
+    children_no_B = len(childrenB)
+
+    if nodeA.node_type == nodeB.node_type and children_no_A == children_no_B:
+        if children_no_A != 0:
+            for i in range(len(childrenA)):
+                check_children(childrenA[i], childrenB[i],  difference)
+
+    else:
+        if nodeA.node_type == 'Hash':
+            text = 'Difference ' + \
+                str(num) + ' : ' + nodeA.children[0].description + \
+                ' has been changed to ' + nodeB.description
+            text = modify_text(text)
+            # print(text)
+            # print('\n')
+            difference.append(text)
+            num += 1
+
+        elif nodeB.node_type == 'Hash':
+            text = 'Difference ' + str(num) + ' : ' + nodeA.description + \
+                ' has been changed to ' + nodeB.children[0].description
+            text = modify_text(text)
+            # print(text)
+            # print('\n')
+            difference.append(text)
+            num += 1
+
+        elif 'Gather' in nodeA.node_type:
+            check_children(childrenA[0], nodeB, difference)
+
+        elif 'Gather' in nodeB.node_type:
+            check_children(nodeA, childrenB[0],  difference)
+        else:
+            text = 'Difference ' + \
+                str(num) + ' : ' + nodeA.description + \
+                ' has been changed to ' + nodeB.description
+            text = modify_text(text)
+            # print(text)
+            # print('\n')
+            difference.append(text)
+            num += 1
+
+        if children_no_A == children_no_B:
+            if children_no_A == 1:
+                check_children(childrenA[0], childrenB[0], difference)
+            if children_no_A == 2:
+                check_children(childrenA[0], childrenB[0], difference)
+                check_children(childrenA[1], childrenB[1],  difference)
 
 def get_diff(json_obj_A, json_obj_B):
+    global num
     head_node_a = parse_json(json_obj_A)
     # print(head_node_a.node_type)
     # print_node_info(head_node_a)
@@ -408,65 +466,9 @@ def get_diff(json_obj_A, json_obj_B):
     clear_cache()
     to_text(head_node_b)
 
-    def modify_text(str):
-        str = str.replace('perform ', '')
-        return str
-
-    def check_children(nodeA, nodeB, num, difference):
-        childrenA = nodeA.children
-        childrenB = nodeB.children
-        children_no_A = len(childrenA)
-        children_no_B = len(childrenB)
-
-        if nodeA.node_type == nodeB.node_type and children_no_A == children_no_B:
-            if children_no_A != 0:
-                for i in range(len(childrenA)):
-                    check_children(childrenA[i], childrenB[i], num, difference)
-
-        else:
-            if nodeA.node_type == 'Hash':
-                text = 'Difference ' + \
-                    str(num) + ' : ' + nodeA.children[0].description + \
-                    ' has been changed to ' + nodeB.description
-                text = modify_text(text)
-                # print(text)
-                # print('\n')
-                difference.append(text)
-                num += 1
-
-            elif nodeB.node_type == 'Hash':
-                text = 'Difference ' + str(num) + ' : ' + nodeA.description + \
-                    ' has been changed to ' + nodeB.children[0].description
-                text = modify_text(text)
-                # print(text)
-                # print('\n')
-                difference.append(text)
-                num += 1
-
-            elif 'Gather' in nodeA.node_type:
-                check_children(childrenA[0], nodeB, num, difference)
-
-            elif 'Gather' in nodeB.node_type:
-                check_children(nodeA, childrenB[0], num, difference)
-            else:
-                text = 'Difference ' + \
-                    str(num) + ' : ' + nodeA.description + \
-                    ' has been changed to ' + nodeB.description
-                text = modify_text(text)
-                # print(text)
-                # print('\n')
-                difference.append(text)
-                num += 1
-
-            if children_no_A == children_no_B:
-                if children_no_A == 1:
-                    check_children(childrenA[0], childrenB[0],num, difference)
-                if children_no_A == 2:
-                    check_children(childrenA[0], childrenB[0], num, difference)
-                    check_children(childrenA[1], childrenB[1], num, difference)
     num=1
     difference = []
-    check_children(head_node_a, head_node_b,num, difference)
+    check_children(head_node_a, head_node_b, difference)
     diff_str = ""
     for diff in difference:
         diff_str = diff_str + diff + "\n"
