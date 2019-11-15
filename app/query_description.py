@@ -392,11 +392,90 @@ def generate_tree(tree, node, _prefix="", _last=True):
         tree = tree + generate_tree(tree, child, _prefix, _last)
     return tree
 
+
+def generate_why(node_a, node_b, num):
+
+    text = ""
+    if node_a.node_type =="Index Scan" and node_b.node_type == "Seq Scan":
+        text = "Reason for Difference " + str(num) + ": " 
+        text += node_a.node_type + " in P1 on relation " + node_a.relation_name + " has now evolved to Sequential Scan in P2 on relation " + node_b.relation_name + ". This is because "
+        if node_b.index_name is None:
+            text += "P1 uses the index, i.e. " + node_a.index_name + ", for selection while P2 doesn't. "
+        if int(node_a.actual_rows) < int(node_b.actual_rows):
+            text += "and the actual row number increases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ", "
+
+        if node_a.index_cond != node_b.table_filter and int(node_a.actual_rows) < int(node_b.actual_rows):
+            text += "This may be due to the selection predicates change from " + (node_a.index_cond if node_a.index_cond is not None else "None ") + " to " + (node_b.table_filter if node_b.table_filter is not None else "None ") + ". "
+        
+    elif node_b.node_type =="Index Scan" and node_a.node_type == "Seq Scan":
+        text = "Reason for Difference " + str(num) + ": " 
+        text += "Sequential Scan in P1 on relation " + node_a.relation_name + " has now evolved to " + node_b.node_type +" in P2 on relation " + node_b.relation_name + ". This is because "
+        if  node_a.index_name is None:  
+            text += "P2 uses the index, i.e. " + node_b.index_name + ", for selection while P1 doesn't. "
+        elif node_a.index_name is not None:
+            text += "Both P1 and P2 uses the index, which are respectively " + node_a.index_name + " and " + node_b.index_name + ". "
+        if int(node_a.actual_rows) > int(node_b.actual_rows):
+            text += "and the actual row number decreases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+        if node_a.table_filter != node_b.index_cond and int(node_a.actual_rows) > int(node_b.actual_rows):
+            text += "This may be due to the selection predicate changes from " + (node_a.table_filter if node_a.table_filter is not None else "None") + " to " + (node_b.index_cond if node_b.index_cond is not None else "None") + ". "
+
+    elif node_a.node_type and node_b.node_type in ['Merge Join', "Hash Join", "Nested Loop"]:
+        text = "Reason for Difference " + str(num) + ": " 
+        if node_a.node_type == "Nested Loop" and node_b.node_type == "Merge Join":
+            text += node_a.node_type + " in P1 on has now evolved to " + node_b.node_type +" in P2 on relation " + ". This is because "
+            if int(node_a.actual_rows) < int(node_b.actual_rows):
+                text += "the actual row number increases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ", "
+            if "=" in node_b.node_type:
+                text += "The join condition uses an equality operator. "
+            text += "The both side of the Join operator of P2 can be sorted on the join condition efficiently . "
+
+        if node_a.node_type == "Nested Loop" and node_b.node_type == "Hash Join":
+            text += node_a.node_type + " in P1 on has now evolved to " + node_b.node_type +" in P2 on relation " + ". This is because "
+            if int(node_a.actual_rows) < int(node_b.actual_rows):
+                text += "the actual row number increases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+            if "=" in node_b.node_type:
+                text += "The join condition uses an equality operator. "
+                
+        if node_a.node_type == "Merge Join" and node_b.node_type == "Nested Loop":
+            text += node_a.node_type + " in P1 on has now evolved to " + node_b.node_type +" in P2 on relation " + ". This is because "
+            if int(node_a.actual_rows) > int(node_b.actual_rows):
+                text += "the actual row number decreases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+            elif int(node_a.actual_rows) < int(node_b.actual_rows):
+                text += "the actual row number increases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+                text += node_b.node_type + " joins are used  if the join condition does not use the equality operator"
+            
+        if node_a.node_type == "Merge Join" and node_b.node_type == "Hash Join":
+            text += node_a.node_type + " in P1 on has now evolved to " + node_b.node_type +" in P2 on relation " + ". " 
+            if int(node_a.actual_rows) < int(node_b.actual_rows):
+                text += "This is because the actual row number increases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+            if int(node_a.actual_rows) > int(node_b.actual_rows):
+                text += "The actual row number decreases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+            text += "The both side of the Join operator of P2 can be sorted on the join condition efficiently . "
+
+        if node_a.node_type == "Hash Join" and node_b.node_type == "Nested Loop":
+            text += node_a.node_type + " in P1 on has now evolved to " + node_b.node_type +" in P2 on relation " + ". This is because "
+            if int(node_a.actual_rows) > int(node_b.actual_rows):
+                text += "the actual row number decreases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+            elif int(node_a.actual_rows) < int(node_b.actual_rows):
+                text += "the actual row number increases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+                text += node_b.node_type + " joins are used  if the join condition does not use the equality operator"
+
+        if node_a.node_type == "Hash Join" and node_b.node_type == "Merge Join":
+            text += node_a.node_type + " in P1 on has now evolved to " + node_b.node_type +" in P2 on relation " + ". " 
+            if int(node_a.actual_rows) < int(node_b.actual_rows):
+                text += "The actual row number increases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+            if int(node_a.actual_rows) > int(node_b.actual_rows):
+                text += "The actual row number decreases from " + str(node_a.actual_rows) + " to " + str(node_b.actual_rows) + ". "
+            text += "The both side of the Join operator of P2 can be sorted on the join condition efficiently. "
+
+    return text
+
+
 def modify_text(str):
     str = str.replace('perform ', '')
     return str
 
-def check_children(nodeA, nodeB, difference):
+def check_children(nodeA, nodeB, difference, reasons):
     global num
     childrenA = nodeA.children
     childrenB = nodeB.children
@@ -406,70 +485,69 @@ def check_children(nodeA, nodeB, difference):
     if nodeA.node_type == nodeB.node_type and children_no_A == children_no_B:
         if children_no_A != 0:
             for i in range(len(childrenA)):
-                check_children(childrenA[i], childrenB[i],  difference)
+                check_children(childrenA[i], childrenB[i],  difference, reasons)
 
     else:
-        if nodeA.node_type == 'Hash':
+        if nodeA.node_type == 'Hash' or nodeA.node_type == 'Sort':
             text = 'Difference ' + \
                 str(num) + ' : ' + nodeA.children[0].description + \
                 ' has been changed to ' + nodeB.description
             text = modify_text(text)
-            # print(text)
-            # print('\n')
             difference.append(text)
+            reason = generate_why(nodeA.children[0], nodeB, num)
+            reasons.append(reason)
             num += 1
 
-        elif nodeB.node_type == 'Hash':
+        elif nodeB.node_type == 'Hash' or nodeB.node_type == 'Sort':
             text = 'Difference ' + str(num) + ' : ' + nodeA.description + \
                 ' has been changed to ' + nodeB.children[0].description
             text = modify_text(text)
-            # print(text)
-            # print('\n')
             difference.append(text)
+            reason = generate_why(nodeA, nodeB.children[0], num)
+            reasons.append(reason)
             num += 1
 
         elif 'Gather' in nodeA.node_type:
-            check_children(childrenA[0], nodeB, difference)
+            check_children(childrenA[0], nodeB, difference, reasons)
 
         elif 'Gather' in nodeB.node_type:
-            check_children(nodeA, childrenB[0],  difference)
+            check_children(nodeA, childrenB[0],  difference, reasons)
         else:
             text = 'Difference ' + \
                 str(num) + ' : ' + nodeA.description + \
                 ' has been changed to ' + nodeB.description
             text = modify_text(text)
-            # print(text)
-            # print('\n')
             difference.append(text)
+            reason = generate_why(nodeA, nodeB, num)
+            reasons.append(reason)
             num += 1
 
         if children_no_A == children_no_B:
             if children_no_A == 1:
-                check_children(childrenA[0], childrenB[0], difference)
+                check_children(childrenA[0], childrenB[0], difference, reasons)
             if children_no_A == 2:
-                check_children(childrenA[0], childrenB[0], difference)
-                check_children(childrenA[1], childrenB[1],  difference)
+                check_children(childrenA[0], childrenB[0], difference, reasons)
+                check_children(childrenA[1], childrenB[1],  difference, reasons)
 
 def get_diff(json_obj_A, json_obj_B):
     global num
     head_node_a = parse_json(json_obj_A)
-    # print(head_node_a.node_type)
-    # print_node_info(head_node_a)
-    # print(len(head_node_a.children))
-    # print_node_info(head_node_a.children[0])
     clear_cache()
     to_text(head_node_a)
 
     head_node_b = parse_json(json_obj_B)
-    # print(head_node_b.node_type)
-    # print_node_info(head_node_b)
     clear_cache()
     to_text(head_node_b)
 
     num=1
     difference = []
-    check_children(head_node_a, head_node_b, difference)
+    reasons = []
+    check_children(head_node_a, head_node_b, difference, reasons)
     diff_str = ""
-    for diff in difference:
-        diff_str = diff_str + diff + "\n"
+    for i in range (len(reasons)):
+        diff_str = diff_str + difference[i] + "\n\n"
+        if reasons[i] != "":
+            diff_str = diff_str + reasons[i] + "\n" 
+        if i != len(reasons)-1:
+            diff_str = diff_str + "-"*200 + "\n"
     return diff_str

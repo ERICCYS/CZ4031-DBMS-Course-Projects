@@ -2,14 +2,16 @@ import sys
 import json
 import tkinter as tk
 from tkinter import *
+from tkinter.font import Font
 from tkinter import messagebox
 from query_description import *
 from pyconnect import DBConnection
+import argparse
 
 
 class App(object):
 
-    def __init__(self, parent):
+    def __init__(self, parent, host, port, database, user, password):
         self.root = parent
         self.root.title("Main Frame")
         self.frm_input_text = tk.Frame(self.root)
@@ -18,9 +20,10 @@ class App(object):
         self.frm_input.pack()
         self.frm_line = tk.Frame(self.root)
         self.frm_line.pack()
-        canvas = Canvas(self.frm_line,width = 2000,height = 20)
-        canvas.create_line(0,15,2000,15)
+        canvas = Canvas(self.frm_line, width=2000, height=20)
+        canvas.create_line(0, 15, 2000, 15)
         canvas.pack()
+        output_font = Font(family=None, size=15)
         self.frm_nlp_text = tk.Frame(self.root)
         self.frm_nlp_text.pack()
         self.frm_nlp = tk.Frame(self.root)
@@ -30,90 +33,113 @@ class App(object):
         self.frm_tree = tk.Frame(self.root)
         self.frm_tree.pack()
         self.frm_diff_text = tk.Frame(self.root)
-        self.frm_diff_text.pack()   
+        self.frm_diff_text.pack()
         self.frm_diff = tk.Frame(self.root)
-        self.frm_diff.pack()   
+        self.frm_diff.pack()
 
         self.frm_input_t = tk.Frame(self.frm_input)
-        self.frm_input_t.pack(side = LEFT)
+        self.frm_input_t.pack(side=LEFT)
         self.frm_input_btt = tk.Frame(self.frm_input)
-        self.frm_input_btt.pack(side = RIGHT)
+        self.frm_input_btt.pack(side=RIGHT)
 
         self.frm_nlp_t = tk.Frame(self.frm_nlp)
-        self.frm_nlp_t.pack(side = LEFT)
+        self.frm_nlp_t.pack(side=LEFT)
         self.frm_nlp_btt = tk.Frame(self.frm_nlp)
-        self.frm_nlp_btt.pack(side = RIGHT)
+        self.frm_nlp_btt.pack(side=RIGHT)
 
         self.frm_tree_t = tk.Frame(self.frm_tree)
-        self.frm_tree_t.pack(side = LEFT)
+        self.frm_tree_t.pack(side=LEFT)
         self.frm_tree_btt = tk.Frame(self.frm_tree)
-        self.frm_tree_btt.pack(side = RIGHT)
+        self.frm_tree_btt.pack(side=RIGHT)
 
         self.frm_tree_t = tk.Frame(self.frm_tree)
-        self.frm_tree_t.pack(side = LEFT)
+        self.frm_tree_t.pack(side=LEFT)
         self.frm_tree_btt = tk.Frame(self.frm_tree)
-        self.frm_tree_btt.pack(side = RIGHT)
+        self.frm_tree_btt.pack(side=RIGHT)
 
         self.frm_diff_t = tk.Frame(self.frm_diff)
-        self.frm_diff_t.pack(side = LEFT)
+        self.frm_diff_t.pack(side=LEFT)
         self.frm_diff_btt = tk.Frame(self.frm_diff)
-        self.frm_diff_btt.pack(side = RIGHT)
+        self.frm_diff_btt.pack(side=RIGHT)
 
-        self.input_text1 = tk.Label(self.frm_input_text, text='Please input old query:', font=(None, 16),width = 60)
-        self.input_text1.pack(side = LEFT,pady =5)
-        self.input_text2 = tk.Label(self.frm_input_text, text='Please input new query:                     ', font=(None, 16), width = 75)
-        self.input_text2.pack(side = RIGHT,pady =5)
+        self.input_text1 = tk.Label(
+            self.frm_input_text, text='Please Input Old Query:', font=(None, 16), width=60)
+        self.input_text1.pack(side=LEFT, pady=5)
+        self.input_text2 = tk.Label(
+            self.frm_input_text, text='Please Input New Query:                     ', font=(None, 16), width=75)
+        self.input_text2.pack(side=RIGHT, pady=5)
 
-        self.input1 = tk.Text(self.frm_input_t, relief=GROOVE, width=75, height=8, borderwidth=5, font=(None, 12))
-        self.input1.pack(side=LEFT, padx = 10)
-        self.input2 = tk.Text(self.frm_input_t, relief=RIDGE, width=75, height=8, borderwidth=5, font=(None, 12))
-        self.input2.pack(side=RIGHT, padx = 10)
+        self.input1 = tk.Text(self.frm_input_t, relief=GROOVE,
+                              width=75, height=8, borderwidth=5, font=(None, 12))
+        self.input1.pack(side=LEFT, padx=10)
+        self.input2 = tk.Text(self.frm_input_t, relief=RIDGE,
+                              width=75, height=8, borderwidth=5, font=(None, 12))
+        self.input2.pack(side=RIGHT, padx=10)
 
-        self.view = tk.Button(self.frm_input_btt, text="view output", width=10, height=2, command=self.retrieve_input)
-        self.view.pack(pady = 10)
-        
-        self.clear = tk.Button(self.frm_input_btt, text="clear input", width=10, height=2, command=self.clear_input)
-        self.clear.pack(pady = 10)
+        self.view = tk.Button(self.frm_input_btt, text="view output",
+                              width=10, height=2, command=self.retrieve_input)
+        self.view.pack(pady=10)
 
- 
-        self.nlp_text1 = tk.Label(self.frm_nlp_text, text='Old query execution plan:', font=(None, 16),width = 60)
-        self.nlp_text1.pack(side = LEFT,pady =5)
-        self.nlp_text2 = tk.Label(self.frm_nlp_text, text='New query execution plan:                     ', font=(None, 16), width = 75)
-        self.nlp_text2.pack(side = RIGHT,pady =5)
+        self.clear = tk.Button(self.frm_input_btt, text="clear input",
+                               width=10, height=2, command=self.clear_input)
+        self.clear.pack(pady=10)
 
-        self.nlp1 = tk.Text(self.frm_nlp_t, relief=GROOVE, width=75, height=8, borderwidth=5, font=(None, 12),state ='disabled')
-        self.nlp1.pack(side=LEFT, padx = 10)
-        self.nlp2 = tk.Text(self.frm_nlp_t, relief=RIDGE, width=75, height=8, borderwidth=5, font=(None, 12),state ='disabled')
-        self.nlp2.pack(side=RIGHT, padx = 10)
-        self.placeholder1 = tk.Label(self.frm_nlp_btt,width = 10)
+        self.nlp_text1 = tk.Label(
+            self.frm_nlp_text, text='Old Query Execution Plan:', font=(None, 16), width=60)
+        self.nlp_text1.pack(side=LEFT, pady=5)
+        self.nlp_text2 = tk.Label(
+            self.frm_nlp_text, text='New Query Execution Plan:                     ', font=(None, 16), width=75)
+        self.nlp_text2.pack(side=RIGHT, pady=5)
+
+        self.nlp1 = tk.Text(self.frm_nlp_t, relief=GROOVE, width=75,
+                            height=8, borderwidth=5, font=(None, 12), state='disabled')
+        self.nlp1.pack(side=LEFT, padx=10)
+        self.nlp2 = tk.Text(self.frm_nlp_t, relief=RIDGE, width=75,
+                            height=8, borderwidth=5, font=(None, 12), state='disabled')
+        self.nlp2.pack(side=RIGHT, padx=10)
+        self.placeholder1 = tk.Label(self.frm_nlp_btt, width=10)
         self.placeholder1.pack()
 
-        self.tree_text1 = tk.Label(self.frm_tree_text, text='Old query tree structure:', font=(None, 16),width = 60)
-        self.tree_text1.pack(side = LEFT,pady =5)
-        self.tree_text2 = tk.Label(self.frm_tree_text, text='New query tree structure:                     ', font=(None, 16), width = 75)
-        self.tree_text2.pack(side = RIGHT,pady =5)
+        self.tree_text1 = tk.Label(
+            self.frm_tree_text, text='Old Query Tree Structure:', font=(None, 16), width=60)
+        self.tree_text1.pack(side=LEFT, pady=5)
+        self.tree_text2 = tk.Label(
+            self.frm_tree_text, text='New Query Tree Structure:                     ', font=(None, 16), width=75)
+        self.tree_text2.pack(side=RIGHT, pady=5)
 
-        self.tree1 = tk.Text(self.frm_tree_t, relief=GROOVE, width=75, height=8, borderwidth=5, font=(None, 12),state ='disabled')
-        self.tree1.pack(side=LEFT, padx = 10)
-        self.tree2 = tk.Text(self.frm_tree_t, relief=RIDGE, width=75, height=8, borderwidth=5, font=(None, 12),state ='disabled')
-        self.tree2.pack(side=RIGHT, padx = 10)
-        self.placeholder2 = tk.Label(self.frm_tree_btt,width = 10)
+        self.tree1 = tk.Text(self.frm_tree_t, relief=GROOVE, width=75,
+                             height=8, borderwidth=5, font=(None, 12), state='disabled')
+        self.tree1.pack(side=LEFT, padx=10)
+        self.tree2 = tk.Text(self.frm_tree_t, relief=RIDGE, width=75,
+                             height=8, borderwidth=5, font=(None, 12), state='disabled')
+        self.tree2.pack(side=RIGHT, padx=10)
+        self.placeholder2 = tk.Label(self.frm_tree_btt, width=10)
         self.placeholder2.pack()
 
-        self.placeholder3 = tk.Label(self.frm_diff_text,width = 60)
-        self.placeholder3.pack(pady =5)
+        self.placeholder3 = tk.Label(self.frm_diff_text, width=60)
+        self.placeholder3.pack(pady=5)
 
-        self.diff_text = tk.Label(self.frm_diff_text, text='Difference between two query plans:', font=(None, 16),width = 60)
-        self.diff_text.pack(side = LEFT,pady =5)
+        self.diff_text = tk.Label(
+            self.frm_diff_text, text='Differences Between Two QEPs and Reasons:', font=(None, 16), width=60)
+        self.diff_text.pack(side=LEFT, pady=5)
 
-        self.diff = tk.Text(self.frm_diff_t, relief=GROOVE, width=155, height=8, borderwidth=5, font=(None, 12),state ='disabled')
-        self.diff.pack(side=LEFT, padx = 10)
+        self.diff = tk.Text(self.frm_diff_t, relief=GROOVE, width=155,
+                            height=15, borderwidth=5, font=(None, 12), state='disabled')
+        self.diff.pack(side=LEFT, padx=10)
 
-        self.clear_out = tk.Button(self.frm_diff_btt, text="clear output", width=10, height=2, command=self.clear_output)
-        self.clear_out.pack(pady = 10)
+        self.clear_out = tk.Button(
+            self.frm_diff_btt, text="clear output", width=10, height=2, command=self.clear_output)
+        self.clear_out.pack(pady=10)
 
-        self.quit_ = tk.Button(self.frm_diff_btt, text="quit program", width=10, height=2, command=self.quitprogram)
-        self.quit_.pack(pady = 10)
+        self.quit_ = tk.Button(self.frm_diff_btt, text="quit program",
+                               width=10, height=2, command=self.quitprogram)
+        self.quit_.pack(pady=10)
+
+        self.host = host
+        self.port = port
+        self.database = database
+        self.user = user
+        self.password = password
 
     def retrieve_input(self):
         global query_old
@@ -131,22 +157,22 @@ class App(object):
         result_old_tree = self.get_tree(result_old_obj)
         result_new_tree = self.get_tree(result_new_obj)
         result_diff = self.get_difference(result_old_obj, result_new_obj)
-        self.nlp1.configure(state ='normal')
-        self.nlp2.configure(state ='normal')
-        self.tree1.configure(state ='normal')
-        self.tree2.configure(state ='normal')
-        self.diff.configure(state ='normal')
-        
+        self.nlp1.configure(state='normal')
+        self.nlp2.configure(state='normal')
+        self.tree1.configure(state='normal')
+        self.tree2.configure(state='normal')
+        self.diff.configure(state='normal')
+
         self.nlp1.delete("1.0", END)
-        self.nlp1.insert(END,result_old_nlp)
+        self.nlp1.insert(END, result_old_nlp)
         self.nlp2.delete("1.0", END)
-        self.nlp2.insert(END,result_new_nlp)
+        self.nlp2.insert(END, result_new_nlp)
         self.tree1.delete("1.0", END)
-        self.tree1.insert(END,result_old_tree)
+        self.tree1.insert(END, result_old_tree)
         self.tree2.delete("1.0", END)
-        self.tree2.insert(END,result_new_tree)
+        self.tree2.insert(END, result_new_tree)
         self.diff.delete("1.0", END)
-        self.diff.insert(END,result_diff)
+        self.diff.insert(END, result_diff)
 
     def clear_input(self):
         self.input1.delete("1.0", END)
@@ -158,21 +184,15 @@ class App(object):
         self.tree1.delete("1.0", END)
         self.tree2.delete("1.0", END)
         self.diff.delete("1.0", END)
-        self.nlp1.configure(state ='disabled')
-        self.nlp2.configure(state ='disabled')
-        self.tree1.configure(state ='disabled')
-        self.tree2.configure(state ='disabled')
-        self.diff.configure(state ='disabled')
+        self.nlp1.configure(state='disabled')
+        self.nlp2.configure(state='disabled')
+        self.tree1.configure(state='disabled')
+        self.tree2.configure(state='disabled')
+        self.diff.configure(state='disabled')
 
     def get_query_result(self, query):
-        # DBConnection takes 4 arguments
-        host="localhost" 
-        port = 5432
-        database="tpch_db"
-        user="eric"
-        password=""
-
-        connection = DBConnection()
+        # DBConnection takes 5 arguments
+        connection = DBConnection(self.host, self.port, self.database, self.user, self.password)
         result = connection.execute(query)[0][0]
         connection.close()
         return result
@@ -187,22 +207,32 @@ class App(object):
     def get_tree(self, json_obj):
         head = parse_json(json_obj)
         return generate_tree("", head)
-    
+
     def get_difference(self, json_object_A, json_object_B):
         diff = get_diff(json_object_A, json_object_B)
         return diff
-        
 
     def quitprogram(self):
-        result = messagebox.askokcancel("Quit the game.", "Are you sure?", icon='warning')
+        result = messagebox.askokcancel(
+            "Quit the game.", "Are you sure?", icon='warning')
         if result == True:
             self.root.destroy()
-#			root.update()
-#			root.deiconify()		
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', help='postgresql connection host')
+    parser.add_argument('--port', help='postgresql connection port')
+    parser.add_argument('--database', help='the tpch database to connect')
+    parser.add_argument('--user', help='db user')
+    parser.add_argument('--password', help='db password')
+    args = parser.parse_args()
+    host = args.host
+    port = args.port
+    database = args.database
+    user = args.user
+    password = args.password
     root = tk.Tk()
-    app = App(root)
+    app = App(root, host, port, database, user, password)
     root.geometry('1500x1000+0+0')
     root.mainloop()
