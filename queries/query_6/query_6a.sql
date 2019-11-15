@@ -1,6 +1,10 @@
+--Nested Loop inner join
 \t
 \a
 
-explain (analyze, costs, verbose, buffers, format json) select customer.custkey, customer.name, nation_a.name from customer, (select nationkey, name from nation where nationkey >= 10) as nation_a where customer.nationkey = nation_a.nationkey and customer.acctbal >= 1000 order by customer.custkey desc;
+explain (analyze, costs, verbose, buffers, format json) select *
+from (SELECT supplier.nationkey,supplier.suppkey FROM supplier WHERE 20=suppkey) AS a
+join (SELECT nation.nationkey, nation.regionkey FROM nation) As b
+on a.nationkey = b.nationkey
 
 \g './queries/query_6/query_6a.json'

@@ -1,6 +1,9 @@
 \t
 \a
 
-explain (analyze, costs, verbose, buffers, format json) select count(*) as customer_count, nation.name from customer, nation where customer.nationkey = nation.nationkey group by nation.name having count(*) >= 6000 order by customer_count desc;
+explain (analyze, costs, verbose, buffers, format json) select part.brand, part.partkey, lineitem.commitdate
+from part, lineitem
+where lineitem.partkey = part.partkey and lineitem.commitdate > '1997-01-01'
+order by lineitem.commitdate desc;
 
 \g './queries/query_3/query_3b.json'
