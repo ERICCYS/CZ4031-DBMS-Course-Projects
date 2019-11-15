@@ -1,6 +1,6 @@
 \t
 \a
 
-explain (analyze, costs, verbose, buffers, format json) select count(*) as brand_sold, part.brand from part, lineitem where lineitem.partkey = part.partkey group by part.brand order by brand_sold desc;
+explain (analyze, costs, verbose, buffers, format json) select part.brand, part.partkey, lineitem.commitdate from part, lineitem where lineitem.partkey = part.partkey and part.partkey >= 150000 order by part.partkey desc;
 
 \g './queries/query_4/query_4a.json'
