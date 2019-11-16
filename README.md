@@ -1,5 +1,7 @@
 # CZ4031-DBMS-Course-Projects
 
+Ma Xiao, Tang Jiayun, Shi Yuxin
+
 # Project 1: Queries and Indices
 
 This project aims to demonstrate a process of using a database, including creating database, preparing queries, explore different indices.
